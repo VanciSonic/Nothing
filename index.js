@@ -95,30 +95,32 @@ client.on(Events.InteractionCreate, async (interaction) => {
         // 🎁 CLAIM
         if (interaction.customId === "claim") {
 
+            await interaction.deferReply({ ephemeral: true });
+        
             if (!interaction.member.roles.cache.has(CLAIM_ROLE)) {
-                return interaction.reply({ content: "❌ No Access", ephemeral: true });
+                return interaction.editReply("❌ No Access");
             }
-
+        
             const db = loadDB();
-
-            if (db.claimed_keys[userId]) {
-                return interaction.reply({ content: "❌ Already claimed!", ephemeral: true });
+        
+            if (db.claimed_keys[interaction.user.id]) {
+                return interaction.editReply("❌ Already claimed!");
             }
-
+        
             if (db.available_keys.length === 0) {
-                return interaction.reply({ content: "❌ Stock empty!", ephemeral: true });
+                return interaction.editReply("❌ Stock empty!");
             }
-
+        
             const key = db.available_keys.shift();
-            db.claimed_keys[userId] = key;
-
+            db.claimed_keys[interaction.user.id] = key;
+        
             saveDB(db);
-
+        
             try {
                 await interaction.user.send(`🎉 Your Key:\n${key}`);
-                await interaction.reply({ content: "✅ Check DM!", ephemeral: true });
+                await interaction.editReply("✅ Check DM!");
             } catch {
-                await interaction.reply({ content: "❌ Open DM dulu!", ephemeral: true });
+                await interaction.editReply("❌ Open DM dulu!");
             }
         }
 
