@@ -1,0 +1,160 @@
+const {
+    Client,
+    GatewayIntentBits,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    Events,
+    REST,
+    Routes,
+    SlashCommandBuilder
+} = require('discord.js');
+
+const fs = require('fs');
+
+// 🔐 GANTI TOKEN SETELAH RESET!
+const TOKEN = "MTQ4Mzc1OTUzOTUzMzc3NTAwOQ.GEIWOc.Gx0jek3i5qs2Krof5NQ7N6oq5r8UKd-K4c-i-8";
+
+// 🔧 GANTI INI
+const CLIENT_ID = "1483759539533775009";
+const GUILD_ID = "1067074769855451216";
+
+const CLAIM_ROLE = "1180539917521145867";
+const ADMIN_ROLE = "1074007333845340180";
+
+// 🚀 Client
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
+// 📂 Load DB
+function loadDB() {
+    return JSON.parse(fs.readFileSync('./db.json'));
+}
+
+// 💾 Save DB
+function saveDB(data) {
+    fs.writeFileSync('./db.json', JSON.stringify(data, null, 2));
+}
+
+// 🚀 READY + REGISTER COMMAND
+client.once('ready', async () => {
+    console.log(`🔥 Bot nyala: ${client.user.tag}`);
+
+    const commands = [
+        new SlashCommandBuilder()
+            .setName('panel')
+            .setDescription('Open HWID panel')
+    ].map(cmd => cmd.toJSON());
+
+    const rest = new REST({ version: '10' }).setToken(TOKEN);
+
+    await rest.put(
+        Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+        { body: commands }
+    );
+
+    console.log("✅ Command /panel ready");
+});
+
+// 🎛️ INTERACTION
+client.on(Events.InteractionCreate, async (interaction) => {
+
+    // 🟢 SLASH COMMAND
+    if (interaction.isChatInputCommand()) {
+        if (interaction.commandName === "panel") {
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('claim')
+                    .setLabel('🎁 Claim Key')
+                    .setStyle(ButtonStyle.Success),
+
+                new ButtonBuilder()
+                    .setCustomId('add')
+                    .setLabel('➕ Add Key')
+                    .setStyle(ButtonStyle.Primary)
+            );
+
+            await interaction.reply({
+                content: "🎛️ **HWID PANEL**",
+                components: [row]
+            });
+        }
+    }
+
+    // 🔘 BUTTON
+    if (interaction.isButton()) {
+
+        const userId = interaction.user.id;
+
+        // 🎁 CLAIM
+        if (interaction.customId === "claim") {
+
+            if (!interaction.member.roles.cache.has(CLAIM_ROLE)) {
+                return interaction.reply({ content: "❌ No Access", ephemeral: true });
+            }
+
+            const db = loadDB();
+
+            if (db.claimed_keys[userId]) {
+                return interaction.reply({ content: "❌ Already claimed!", ephemeral: true });
+            }
+
+            if (db.available_keys.length === 0) {
+                return interaction.reply({ content: "❌ Stock empty!", ephemeral: true });
+            }
+
+            const key = db.available_keys.shift();
+            db.claimed_keys[userId] = key;
+
+            saveDB(db);
+
+            try {
+                await interaction.user.send(`🎉 Your Key:\n${key}`);
+                await interaction.reply({ content: "✅ Check DM!", ephemeral: true });
+            } catch {
+                await interaction.reply({ content: "❌ Open DM dulu!", ephemeral: true });
+            }
+        }
+
+        // ➕ ADD KEY
+        if (interaction.customId === "add") {
+
+            if (!interaction.member.roles.cache.has(ADMIN_ROLE)) {
+                return interaction.reply({ content: "❌ Admin only!", ephemeral: true });
+            }
+
+            await interaction.reply({
+                content: "✏️ Kirim key di chat (15 detik)",
+                ephemeral: true
+            });
+
+            const filter = m => m.author.id === interaction.user.id;
+
+            const collector = interaction.channel.createMessageCollector({
+                filter,
+                time: 15000,
+                max: 1
+            });
+
+            collector.on('collect', msg => {
+                const db = loadDB();
+
+                const key = msg.content.trim();
+
+                db.available_keys.push(key);
+                saveDB(db);
+
+                msg.reply("✅ Key berhasil ditambahkan!");
+            });
+        }
+    }
+});
+
+// 🚀 LOGIN
+client.login(TOKEN);
