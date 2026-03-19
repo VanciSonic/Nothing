@@ -81,7 +81,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             );
 
             await interaction.reply({
-                content: "🎛️ **HWID PANEL**",
+                content: "**KEY PANEL**",
                 components: [row]
             });
         }
