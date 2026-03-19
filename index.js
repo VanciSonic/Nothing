@@ -12,23 +12,20 @@ const {
 
 const fs = require('fs');
 
-// 🔐 GANTI TOKEN SETELAH RESET!
 const TOKEN = process.env.DISCORD_TOKEN;
 
-// 🔧 GANTI INI
 const CLIENT_ID = "1483759539533775009";
 const GUILD_ID = "1067074769855451216";
 
 const CLAIM_ROLE = "1180539917521145867";
 const ADMIN_ROLE = "1074007333845340180";
 
+// 🔥 FIREBASE URL
+const BASE = "https://rchub-2d652-default-rtdb.firebaseio.com";
+
 // 🚀 Client
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+    intents: [GatewayIntentBits.Guilds]
 });
 
 // 📂 Load DB
@@ -41,14 +38,30 @@ function saveDB(data) {
     fs.writeFileSync('./db.json', JSON.stringify(data, null, 2));
 }
 
-// 🚀 READY + REGISTER COMMAND
+// 🔥 SAVE KE FIREBASE
+async function saveClaimToFirebase(userId, key) {
+    try {
+        await fetch(`${BASE}/claimed_keys/${userId}.json`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(key)
+        });
+        console.log("✅ Saved to Firebase:", userId);
+    } catch (err) {
+        console.error("❌ Firebase Error:", err);
+    }
+}
+
+// 🚀 READY
 client.once('ready', async () => {
     console.log(`🔥 Bot nyala: ${client.user.tag}`);
 
     const commands = [
         new SlashCommandBuilder()
             .setName('panel')
-            .setDescription('Open HWID panel')
+            .setDescription('Open key panel')
     ].map(cmd => cmd.toJSON());
 
     const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -64,7 +77,7 @@ client.once('ready', async () => {
 // 🎛️ INTERACTION
 client.on(Events.InteractionCreate, async (interaction) => {
 
-    // 🟢 SLASH COMMAND
+    // SLASH COMMAND
     if (interaction.isChatInputCommand()) {
         if (interaction.commandName === "panel") {
 
@@ -81,13 +94,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
             );
 
             await interaction.reply({
-                content: "**CLICK (CLAIM) FOR CLAIM KEY**",
+                content: "**GET KEY PANEL**",
                 components: [row]
             });
         }
     }
 
-    // 🔘 BUTTON
+    // BUTTON
     if (interaction.isButton()) {
 
         const userId = interaction.user.id;
@@ -96,37 +109,38 @@ client.on(Events.InteractionCreate, async (interaction) => {
         if (interaction.customId === "claim") {
             try {
                 await interaction.deferReply({ ephemeral: true });
-        
+
                 const db = loadDB();
-        
-                const member = await interaction.guild.members.fetch(interaction.user.id);
-        
+
+                const member = await interaction.guild.members.fetch(userId);
+
                 if (!member.roles.cache.has(CLAIM_ROLE)) {
                     return await interaction.editReply("❌ No Access");
                 }
-        
-                if (db.claimed_keys[interaction.user.id]) {
+
+                if (db.claimed_keys[userId]) {
                     return await interaction.editReply("❌ Already claimed!");
                 }
-        
+
                 if (!db.available_keys || db.available_keys.length === 0) {
                     return await interaction.editReply("❌ Stock empty!");
                 }
-        
+
                 const key = db.available_keys.shift();
-                db.claimed_keys[interaction.user.id] = key;
-        
+                db.claimed_keys[userId] = key;
+
                 saveDB(db);
-        
-                await interaction.user.send(`🎉 Your Key:\n${key}`);
-        
+
+                // 🔥 SIMPAN KE FIREBASE
+                await saveClaimToFirebase(userId, key);
+
+                await interaction.user.send(`DONT SHARE YOUR KEY !! :\n${key}`);
+
                 return await interaction.editReply("✅ Check DM!");
-        
+
             } catch (err) {
                 console.error(err);
-                if (!interaction.replied) {
-                    await interaction.reply({ content: "❌ Error terjadi", ephemeral: true });
-                }
+                return interaction.editReply("❌ Error terjadi");
             }
         }
 
@@ -138,7 +152,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             }
 
             await interaction.reply({
-                content: "✏️ Kirim key di chat (15 detik)",
+                content: "✏️ Kirim key (15 detik)",
                 ephemeral: true
             });
 
@@ -151,14 +165,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
             });
 
             collector.on('collect', msg => {
-                const db = loadDB();
+                try {
+                    const db = loadDB();
 
-                const key = msg.content.trim();
+                    db.available_keys.push(msg.content.trim());
 
-                db.available_keys.push(key);
-                saveDB(db);
+                    saveDB(db);
 
-                msg.reply("✅ Key berhasil ditambahkan!");
+                    msg.reply("✅ Key berhasil ditambahkan!");
+                } catch (err) {
+                    console.error(err);
+                    msg.reply("❌ Error tambah key");
+                }
             });
         }
     }
