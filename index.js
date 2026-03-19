@@ -94,34 +94,39 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
         // 🎁 CLAIM
         if (interaction.customId === "claim") {
-
-            await interaction.deferReply({ ephemeral: true }); // ⚡ langsung respon
-        
-            const db = loadDB();
-        
-            if (!interaction.member.roles.cache.has(CLAIM_ROLE)) {
-                return interaction.editReply("❌ No Access");
-            }
-        
-            if (db.claimed_keys[interaction.user.id]) {
-                return interaction.editReply("❌ Already claimed!");
-            }
-        
-            if (db.available_keys.length === 0) {
-                return interaction.editReply("❌ Stock empty!");
-            }
-        
-            const key = db.available_keys.shift();
-            db.claimed_keys[interaction.user.id] = key;
-        
-            saveDB(db);
-        
-            await interaction.editReply("✅ Sending key to DM...");
-        
             try {
+                await interaction.deferReply({ ephemeral: true });
+        
+                const db = loadDB();
+        
+                const member = await interaction.guild.members.fetch(interaction.user.id);
+        
+                if (!member.roles.cache.has(CLAIM_ROLE)) {
+                    return await interaction.editReply("❌ No Access");
+                }
+        
+                if (db.claimed_keys[interaction.user.id]) {
+                    return await interaction.editReply("❌ Already claimed!");
+                }
+        
+                if (!db.available_keys || db.available_keys.length === 0) {
+                    return await interaction.editReply("❌ Stock empty!");
+                }
+        
+                const key = db.available_keys.shift();
+                db.claimed_keys[interaction.user.id] = key;
+        
+                saveDB(db);
+        
                 await interaction.user.send(`🎉 Your Key:\n${key}`);
-            } catch {
-                return interaction.editReply("❌ DM kamu ketutup");
+        
+                return await interaction.editReply("✅ Check DM!");
+        
+            } catch (err) {
+                console.error(err);
+                if (!interaction.replied) {
+                    await interaction.reply({ content: "❌ Error terjadi", ephemeral: true });
+                }
             }
         }
 
