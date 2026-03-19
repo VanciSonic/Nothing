@@ -95,13 +95,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
         // 🎁 CLAIM
         if (interaction.customId === "claim") {
 
-            await interaction.deferReply({ ephemeral: true });
+            await interaction.deferReply({ ephemeral: true }); // ⚡ langsung respon
+        
+            const db = loadDB();
         
             if (!interaction.member.roles.cache.has(CLAIM_ROLE)) {
                 return interaction.editReply("❌ No Access");
             }
-        
-            const db = loadDB();
         
             if (db.claimed_keys[interaction.user.id]) {
                 return interaction.editReply("❌ Already claimed!");
@@ -116,11 +116,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
         
             saveDB(db);
         
+            await interaction.editReply("✅ Sending key to DM...");
+        
             try {
                 await interaction.user.send(`🎉 Your Key:\n${key}`);
-                await interaction.editReply("✅ Check DM!");
             } catch {
-                await interaction.editReply("❌ Open DM dulu!");
+                return interaction.editReply("❌ DM kamu ketutup");
             }
         }
 
