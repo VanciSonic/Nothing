@@ -13,7 +13,7 @@ const {
 const fs = require('fs');
 
 // 🔐 GANTI TOKEN SETELAH RESET!
-const TOKEN = "MTQ4Mzc1OTUzOTUzMzc3NTAwOQ.GEIWOc.Gx0jek3i5qs2Krof5NQ7N6oq5r8UKd-K4c-i-8";
+const TOKEN = process.env.DISCORD_TOKEN;
 
 // 🔧 GANTI INI
 const CLIENT_ID = "1483759539533775009";
