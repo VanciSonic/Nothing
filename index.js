@@ -71,17 +71,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('claim')
-                    .setLabel('🎁 Claim Key')
+                    .setLabel('Claim Key')
                     .setStyle(ButtonStyle.Success),
 
                 new ButtonBuilder()
                     .setCustomId('add')
-                    .setLabel('➕ Add Key')
+                    .setLabel('Add Key')
                     .setStyle(ButtonStyle.Primary)
             );
 
             await interaction.reply({
-                content: "**KEY PANEL**",
+                content: "**CLICK (CLAIM) FOR CLAIM KEY**",
                 components: [row]
             });
         }
