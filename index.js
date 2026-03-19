@@ -123,7 +123,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 }
 
                 if (!db.available_keys || db.available_keys.length === 0) {
-                    return await interaction.editReply("❌ Stock empty!");
+                    return await interaction.editReply("❌ Stock empty!, Plase Tag Rexy !");
                 }
 
                 const key = db.available_keys.shift();
