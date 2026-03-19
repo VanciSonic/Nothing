@@ -94,7 +94,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             );
 
             await interaction.reply({
-                content: "**GET KEY PANEL**",
+                content: "**GET KEY PANEL PREMIUM**",
                 components: [row]
             });
         }
