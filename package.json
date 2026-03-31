@@ -1,11 +1,14 @@
 {
-  "name": "hwid-bot",
+  "name": "trakteer-discord-bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.12.1"
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "dotenv": "^16.4.0"
   }
 }
