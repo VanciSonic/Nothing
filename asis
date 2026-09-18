@@ -1,0 +1,986 @@
+-- ============================================================
+-- GANTENG ASISTEN - GitHub Module
+-- Usage:
+-- local gasis = loadstring(game:HttpGet("RAW_GITHUB_URL"))()
+-- gasis("gsk_your_api_key")
+-- ============================================================
+
+return function(API_KEY)
+    if type(API_KEY) ~= "string" or API_KEY == "" then
+        error("[Ganteng Asisten] API key belum diberikan.")
+    end
+
+    -- ============================================================
+    -- GANTENG ASISTEN (Blox Fruits)
+    -- Diedit oleh: [Nama Anda]
+    -- Deskripsi: Asisten AI untuk menjelaskan feature dan cara pakai Ganteng Hub
+    -- ============================================================
+
+    local Players = game:GetService("Players")
+    local HttpService = game:GetService("HttpService")
+    local TweenService = game:GetService("TweenService")
+    local CoreGui = game:GetService("CoreGui")
+
+    local Player = Players.LocalPlayer
+
+    -- ============================================================
+    -- HTTP REQUEST
+    -- ============================================================
+
+    local req =
+        (syn and syn.request)
+        or request
+        or http_request
+        or (http and http.request)
+        or (fluxus and fluxus.request)
+
+    -- ============================================================
+    -- REMOVE OLD UI
+    -- ============================================================
+
+    if CoreGui:FindFirstChild("GantengAsisten_UI") then
+        CoreGui.GantengAsisten_UI:Destroy()
+    end
+
+    -- ============================================================
+    -- UI
+    -- ============================================================
+
+    local GantengGui = Instance.new("ScreenGui")
+    GantengGui.Name = "GantengAsisten_UI"
+    GantengGui.ResetOnSpawn = false
+    GantengGui.IgnoreGuiInset = true
+    GantengGui.Parent = CoreGui
+
+    -- ============================================================
+    -- TOGGLE BUTTON
+    -- ============================================================
+
+    local ToggleBtn = Instance.new("TextButton")
+    ToggleBtn.AnchorPoint = Vector2.new(1, 0.5)
+    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
+    ToggleBtn.Position = UDim2.new(1, -15, 0.25, 0)
+    ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    ToggleBtn.Text = "💬"
+    ToggleBtn.TextSize = 20
+    ToggleBtn.Font = Enum.Font.GothamBold
+    ToggleBtn.Parent = GantengGui
+
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(0, 12)
+    ToggleCorner.Parent = ToggleBtn
+
+    local ToggleStroke = Instance.new("UIStroke")
+    ToggleStroke.Color = Color3.fromRGB(152, 255, 152)
+    ToggleStroke.Thickness = 1.5
+    ToggleStroke.Parent = ToggleBtn
+
+    -- ============================================================
+    -- MAIN WINDOW
+    -- ============================================================
+
+    local MainGroup = Instance.new("CanvasGroup")
+    MainGroup.AnchorPoint = Vector2.new(0.5, 0.5)
+    MainGroup.Size = UDim2.new(0, 280, 0, 340)
+    MainGroup.Position = UDim2.new(0.5, 0, 0.6, 0)
+    MainGroup.GroupTransparency = 1
+    MainGroup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    MainGroup.BackgroundTransparency = 0.3
+    MainGroup.Visible = false
+    MainGroup.Parent = GantengGui
+
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 15)
+    MainCorner.Parent = MainGroup
+
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Color3.fromRGB(152, 255, 152)
+    MainStroke.Thickness = 1.5
+    MainStroke.Parent = MainGroup
+
+    -- ============================================================
+    -- TITLE
+    -- ============================================================
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.BackgroundTransparency = 1
+    Title.Text = "🤖 Ganteng Asisten"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 14
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Parent = MainGroup
+
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.new(1, -20, 0, 1)
+    Line.Position = UDim2.new(0, 10, 0, 40)
+    Line.BackgroundColor3 = Color3.fromRGB(152, 255, 152)
+    Line.BorderSizePixel = 0
+    Line.Parent = MainGroup
+
+    -- ============================================================
+    -- CHAT
+    -- ============================================================
+
+    local ChatScroll = Instance.new("ScrollingFrame")
+    ChatScroll.Size = UDim2.new(1, -20, 1, -95)
+    ChatScroll.Position = UDim2.new(0, 10, 0, 45)
+    ChatScroll.BackgroundTransparency = 1
+    ChatScroll.ScrollBarThickness = 2
+    ChatScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ChatScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    ChatScroll.Parent = MainGroup
+
+    local ChatLayout = Instance.new("UIListLayout")
+    ChatLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ChatLayout.Padding = UDim.new(0, 8)
+    ChatLayout.Parent = ChatScroll
+
+    local ChatPadding = Instance.new("UIPadding")
+    ChatPadding.PaddingBottom = UDim.new(0, 5)
+    ChatPadding.PaddingTop = UDim.new(0, 5)
+    ChatPadding.Parent = ChatScroll
+
+    -- ============================================================
+    -- INPUT AREA
+    -- ============================================================
+
+    local BottomFrame = Instance.new("Frame")
+    BottomFrame.Size = UDim2.new(1, 0, 0, 50)
+    BottomFrame.Position = UDim2.new(0, 0, 1, -50)
+    BottomFrame.BackgroundTransparency = 1
+    BottomFrame.Parent = MainGroup
+
+    local ChatInput = Instance.new("TextBox")
+    ChatInput.Size = UDim2.new(1, -60, 0, 36)
+    ChatInput.Position = UDim2.new(0, 10, 0, 7)
+    ChatInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    ChatInput.BackgroundTransparency = 0.5
+    ChatInput.PlaceholderText = "Ketik pesan..."
+    ChatInput.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
+    ChatInput.Text = ""
+    ChatInput.Font = Enum.Font.Gotham
+    ChatInput.TextSize = 12
+    ChatInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ChatInput.TextXAlignment = Enum.TextXAlignment.Left
+    ChatInput.ClearTextOnFocus = false
+    ChatInput.Parent = BottomFrame
+
+    local InputCorner = Instance.new("UICorner")
+    InputCorner.CornerRadius = UDim.new(1, 0)
+    InputCorner.Parent = ChatInput
+
+    local InputPadding = Instance.new("UIPadding")
+    InputPadding.PaddingLeft = UDim.new(0, 15)
+    InputPadding.PaddingRight = UDim.new(0, 15)
+    InputPadding.Parent = ChatInput
+
+    local InputStroke = Instance.new("UIStroke")
+    InputStroke.Color = Color3.fromRGB(255, 255, 255)
+    InputStroke.Thickness = 1
+    InputStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    InputStroke.Parent = ChatInput
+
+    -- ============================================================
+    -- SEND BUTTON
+    -- ============================================================
+
+    local SendBtn = Instance.new("TextButton")
+    SendBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+    SendBtn.Size = UDim2.new(0, 38, 0, 38)
+    SendBtn.Position = UDim2.new(1, -25, 0.5, 0)
+    SendBtn.BackgroundColor3 = Color3.fromRGB(152, 255, 152)
+    SendBtn.Text = "Kirim"
+    SendBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+    SendBtn.TextSize = 12
+    SendBtn.Font = Enum.Font.GothamBold
+    SendBtn.Parent = BottomFrame
+
+    local SendCorner = Instance.new("UICorner")
+    SendCorner.CornerRadius = UDim.new(1, 0)
+    SendCorner.Parent = SendBtn
+
+    local SendStroke = Instance.new("UIStroke")
+    SendStroke.Color = Color3.fromRGB(255, 255, 255)
+    SendStroke.Thickness = 1.2
+    SendStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    SendStroke.Parent = SendBtn
+
+    local SendScale = Instance.new("UIScale")
+    SendScale.Parent = SendBtn
+
+    -- ============================================================
+    -- WINDOW TOGGLE
+    -- ============================================================
+
+    local isOpen = false
+
+    ToggleBtn.MouseButton1Click:Connect(function()
+
+        ToggleBtn.Rotation = 0
+
+        TweenService:Create(
+            ToggleBtn,
+            TweenInfo.new(
+                0.5,
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Rotation = 360
+            }
+        ):Play()
+
+        isOpen = not isOpen
+
+        if isOpen then
+
+            MainGroup.Visible = true
+
+            TweenService:Create(
+                MainGroup,
+                TweenInfo.new(
+                    0.8,
+                    Enum.EasingStyle.Exponential,
+                    Enum.EasingDirection.Out
+                ),
+                {
+                    Position = UDim2.new(0.5, 0, 0.5, 0),
+                    GroupTransparency = 0
+                }
+            ):Play()
+
+        else
+
+            local tweenOut = TweenService:Create(
+                MainGroup,
+                TweenInfo.new(
+                    0.7,
+                    Enum.EasingStyle.Exponential,
+                    Enum.EasingDirection.In
+                ),
+                {
+                    Position = UDim2.new(0.5, 0, 0.6, 0),
+                    GroupTransparency = 1
+                }
+            )
+
+            tweenOut:Play()
+            tweenOut.Completed:Wait()
+
+            if not isOpen then
+                MainGroup.Visible = false
+            end
+
+        end
+
+    end)
+
+    -- ============================================================
+    -- CHAT BUBBLE
+    -- ============================================================
+
+    local function CreateBubble(text, isUser)
+
+        local Alignment = Instance.new("Frame")
+        Alignment.BackgroundTransparency = 1
+        Alignment.Size = UDim2.new(1, 0, 0, 0)
+        Alignment.AutomaticSize = Enum.AutomaticSize.Y
+        Alignment.Parent = ChatScroll
+
+        local AlignLayout = Instance.new("UIListLayout")
+        AlignLayout.FillDirection = Enum.FillDirection.Horizontal
+        AlignLayout.HorizontalAlignment =
+            isUser
+            and Enum.HorizontalAlignment.Right
+            or Enum.HorizontalAlignment.Left
+        AlignLayout.Parent = Alignment
+
+        local BubbleFrame = Instance.new("Frame")
+        BubbleFrame.BackgroundColor3 =
+            isUser
+            and Color3.fromRGB(152, 255, 152)
+            or Color3.fromRGB(255, 255, 255)
+
+        BubbleFrame.AutomaticSize = Enum.AutomaticSize.XY
+        BubbleFrame.Size = UDim2.new(0, 0, 0, 0)
+        BubbleFrame.Parent = Alignment
+
+        local BubbleCorner = Instance.new("UICorner")
+        BubbleCorner.CornerRadius = UDim.new(0, 20)
+        BubbleCorner.Parent = BubbleFrame
+
+        local BubblePad = Instance.new("UIPadding")
+        BubblePad.PaddingTop = UDim.new(0, 8)
+        BubblePad.PaddingBottom = UDim.new(0, 8)
+        BubblePad.PaddingLeft = UDim.new(0, 12)
+        BubblePad.PaddingRight = UDim.new(0, 12)
+        BubblePad.Parent = BubbleFrame
+
+        local BubbleText = Instance.new("TextLabel")
+        BubbleText.BackgroundTransparency = 1
+        BubbleText.Size = UDim2.new(0, 0, 0, 0)
+        BubbleText.AutomaticSize = Enum.AutomaticSize.XY
+        BubbleText.Text = text
+        BubbleText.Font = Enum.Font.GothamMedium
+        BubbleText.TextSize = 12
+        BubbleText.TextColor3 = Color3.fromRGB(0, 0, 0)
+        BubbleText.TextWrapped = true
+        BubbleText.Parent = BubbleFrame
+
+        local MaxWidth = Instance.new("UISizeConstraint")
+        MaxWidth.MaxSize = Vector2.new(200, 9999)
+        MaxWidth.Parent = BubbleFrame
+
+        local BubbleScale = Instance.new("UIScale")
+        BubbleScale.Scale = 0
+        BubbleScale.Parent = BubbleFrame
+
+        TweenService:Create(
+            BubbleScale,
+            TweenInfo.new(
+                0.4,
+                Enum.EasingStyle.Exponential,
+                Enum.EasingDirection.Out
+            ),
+            {
+                Scale = 1
+            }
+        ):Play()
+
+        task.defer(function()
+            task.wait()
+            ChatScroll.CanvasPosition =
+                Vector2.new(
+                    0,
+                    math.max(
+                        0,
+                        ChatScroll.AbsoluteCanvasSize.Y
+                    )
+                )
+        end)
+
+    end
+
+    -- ============================================================
+    -- GANTENG ASISTEN ENGINE
+    -- Hanya untuk menjelaskan feature + cara pakai Ganteng Hub.
+    -- Tidak boleh menjalankan code, inspection, web search, atau Dev Panel.
+    -- ============================================================
+
+    local COOLDOWN = 6
+    local LastAskAt = 0
+    local isProcessing = false
+
+    local ChatHistory = {}
+
+    local FEATURE_CATALOG = [[
+    [Main > Farm Level]
+    - Dropdown: Select Weapon
+    - Toggle: Farm Level
+    - Toggle: Kill Mob Aura
+
+    [Main > Farm Mob]
+    - Dropdown: Select Mob — Mob list automatically loaded from Quests
+    - Toggle: Auto Take Quest — Automatically take the quest for selected mob
+    - Toggle: Auto Farm Mob — [SELECT FIRST]
+
+    [Main > Farm Chest & Berry]
+    - Toggle: Auto Collect Chest
+    - Toggle: Auto Collect Berry
+    - Toggle: Auto Spawn + Kill Darkbeard — Farm Chest Until First Of Darkness
+    - Toggle: Auto Spawn + Kill Rip_Indra — Need 3 Legendary Haki Color
+
+    [Main > Farm Fishing]
+    - Dropdown: Select Fishing Rod
+    - Dropdown: Select Bait
+    - Toggle: Auto Buy Bait — Automatically craft selected bait
+    - Toggle: Auto Fishing — Automatically cast and catch fish
+    - Toggle: Auto Quest Fishing — Automatically take fishing quest from Angler NPC
+    - Toggle: Auto Complete Quest — Automatically finish quest
+    - Toggle: Auto Sell Fish — Automatically sell fish
+    - Toggle: Auto use skill of the rod — Spam Z skill of equipped rod
+
+    [Main > Farm Mastery]
+    - Dropdown: Select Metode
+    - Toggle: Auto Mastery Fruit
+    - Toggle: Auto Mastery Guns
+    - Slider: Healt Min Kill
+
+    [Main > Farm Elite Boss]
+    - Toggle: Auto Elite Boss
+
+    [Main > Farm Tyrant Of The Skies]
+    - Toggle: Auto Spawn + Kill — Tyrant Of The Skies Farm
+
+    [Main > Farm bone]
+    - Toggle: Farm Bone
+    - Button: Pray
+    - Button: Try Your Luck
+    - Toggle: Random Bone
+
+    [Main > Farm Dough King & Cake Prince]
+    - Toggle: Auto Cake Prince & Dough King
+    - Toggle: Auto Spawn Dough Boss
+
+    [Main > Farm Material]
+    - Dropdown: Select Material
+    - Toggle: Auto Farm Material
+    - Toggle: Auto Farm Ectoplasm
+
+    [Main > Farm Boss]
+    - Dropdown: Select Boss
+    - Toggle: Auto Farm Boss
+
+    [Main > Magnet Event]
+    - Toggle: Auto Magnet Event
+    - Toggle: Auto Gacha Magnet Event
+
+    [Item & Quest > Secret Quest [Beta]]
+    - Dropdown: Select Island — Pilih island yang ingin di-clear sampai full star.
+    - Toggle: Start Auto Secret — Clear semua secret di island yang dipilih sampai 3/3 ⭐.
+
+    [Item & Quest > Main Feature]
+    - Toggle: Auto Seacond Sea
+    - Toggle: Auto Saber Puzzle
+    - Toggle: Auto Third Sea
+    - Toggle: Auto Bartilo Quest
+    - Toggle: Auto Evo Race V2
+    - Toggle: Auto Citizen Quest
+    - Toggle: Auto Raid Castle
+
+    [Item & Quest > Other]
+    - Toggle: Auto Pole V1
+    - Toggle: Auto Shark Saw
+    - Toggle: Auto Warden
+    - Toggle: Auto Hallow Scythe
+    - Toggle: Auto Yama
+    - Toggle: Auto Tushita
+    - Toggle: Auto Puzzle Torch
+    - Toggle: Auto Castle Haki
+    - Toggle: Auto Canvander
+    - Toggle: Auto Musketeer Hat
+    - Toggle: Auto Observartion V2
+    - Toggle: Auto Rainbow Haki
+    - Toggle: Auto Soul Guitar
+    - Toggle: Auto Buddy Sword
+    - Toggle: Auto Curse Dual Katana
+    - Toggle: Auto Factory
+    - Toggle: Auto Don Swan
+    - Toggle: Auto Rengoku
+    - Toggle: Auto Buy Haki Color
+    - Toggle: Auto Buy Legend Sword
+
+    [Setting > Setting Player]
+    - Toggle: Auto Open V3
+    - Toggle: Auto Open V4
+    - Toggle: Auto Open Observation
+    - Toggle: Auto Save Spawn
+    - Toggle: Auto Bring Mob
+    - Toggle: Remove Notify
+    - Toggle: White Screen — Redouce Lag
+    - Slider: Range Bring Mob — Defult : 235
+
+    [Setting > Setting Tween]
+    - Slider: Speed Tween — Defult : 165
+    - Toggle: Bypass Teleport — Use respawn teleport when distance is above 1200
+    - Toggle: Safe Item Protection — Disable bypass while carrying valuable items
+
+    [Setting > Setting Skill]
+    - Toggle: Skill Z
+    - Toggle: Skill X
+    - Toggle: Skill C
+    - Toggle: Skill V
+    - Toggle: Skill F
+
+    [Stats > Stats]
+    - Toggle: Auto Stats Melee
+    - Toggle: Auto Stats Defense
+    - Toggle: Auto Stats Sword
+    - Toggle: Auto Stats Gun
+    - Toggle: Auto Stats Fruit
+
+    [Player Pvp > Combat PLayer]
+    - Dropdown: Select Player
+    - Button: Refresh Player
+    - Toggle: Tp Select Player
+    - Slider: Range Aimbot
+    - Toggle: Aimbot Player
+    - Toggle: Aimbot Gun M1 — Gun M1 follows the nearest player
+
+    [Player Pvp > Other]
+    - Toggle: No Clip
+    - Toggle: Walk on Water
+    - Toggle: Eneable Pvp
+
+    [Other > Character]
+    - Slider: Speed Multi — defult [2]
+    - Slider: Jump Power — defult [50]
+    - Slider: Dash Distance — defult [1]
+    - Toggle: Active Changer — Dash/jump/Speed
+    - Toggle: Anti Stun — Reset Stun value while enabled
+
+    [Teleport > Teleport Sea]
+    - Button: First Sea
+    - Button: Seacond Sea
+    - Button: Third Sea
+
+    [Teleport > Teleport Island & Npc]
+    - Dropdown: Select Island
+    - Toggle: Teleport Island Select
+    - Dropdown: Select Npc
+    - Toggle: Teleport Npc Select
+    - Button: Refresh All Dropdown — Refresh [Npc & Island]
+
+    [Fruit > Fruit]
+    - Dropdown: Select Fruit
+    - Toggle: Auto Buy Fruit — Auto Buy If Fruit Stock
+    - Dropdown: Select Permanent Fruit
+    - Toggle: Switch Permanent Fruit
+    - Toggle: Auto Store Fruit
+    - Toggle: Auto Random Fruit — Auto roll random fruit + cooldown
+    - Toggle: Teleport Fruit — Instant Tp [Drop/Spawn]
+    - Toggle: Tween Fruit — Tween [Drop/Spawn]
+
+    [Esp > Esp Feature]
+    - Toggle: Esp Player
+    - Toggle: Esp Devil Fruit
+    - Toggle: Esp Island
+    - Toggle: Esp Flower — Flower In Sea 2
+    - Toggle: Esp Real Fruit — Pinapple, Apple, Banana
+    - Toggle: Esp Mirrage Island
+
+    [Raid > Raid]
+    - Dropdown: Select Chip
+    - Toggle: Auto Buy Chip — Select Chip First
+    - Toggle: Auto Start Raid
+    - Toggle: Auto Next Island
+    - Toggle: Raid Attack Enemies — Attack nearby raid enemies with AttackEnemies
+    - Toggle: Auto Awake Fruit — Auto awake After Raid
+    - Toggle: Auto Load Fruit Common
+    - Button: Teleport Lab
+
+    [Raid > Auto Farm Fragment]
+    - Dropdown: Select Fruit — OFF = LoadFruit dari dropdown | ON = pakai fruit langsung dari Backpack
+    - Toggle: Use Fruit from Backpack — ON: gunakan Physical Fruit yang sudah ada di Backpack, tanpa LoadFruit. OFF: gunakan fruit yang dipilih di dropdown.
+    - Button: Refresh Fruit List — Refresh PhysicalMoveset dari inventory
+    - Dropdown: Select Raid — Raid yang akan dijalankan
+    - Toggle: Auto Farm Fragment — Backpack mode atau LoadFruit dropdown > Buy Chip > Start Raid > Island 1-5 > Loop
+
+    [Raid > Order Law]
+    - Toggle: Auto Law + Buy Chip
+
+    [Race V4 > Race V4]
+    - Toggle: Auto Temple Lever — Sealed King → Tiki → Mirage → Moon/V3 → Blue Gear → Lever
+    - Button: Tp Tample Of Time
+    - Button: Upgrade Gear Npc
+    - Button: Tp Upgrade Gear
+    - Button: Tp Trial Door
+    - Toggle: Complete Trial [Human/Ghoul]
+    - Toggle: Auto Complete Trial
+    - Toggle: Auto Kill Player [After Trial]
+
+    [Race V4 > Train race]
+    - Toggle: Auto Train V4 [Bone Farm]
+    - Toggle: Upgrade Gear [Race v4]
+
+    [Shop > Shop]
+    - Button: Geppo (Extra Jump)
+    - Button: Haki (Buso Haki)
+    - Button: Soru (Flash Step)
+    - Button: Observation Haki
+
+    [Shop > Sword]
+    - Button: Cutlass [1,000 Beli]
+    - Button: Katana [1,000 Beli]
+    - Button: Dual Katana [12,000 Beli]
+    - Button: Iron Mace [25,000 Beli]
+    - Button: Triple Katana [60,000 Beli]
+    - Button: Pipe [100,000 Beli]
+    - Button: Dual-Headed Blade [400,000 Beli]
+    - Button: Soul Cane [750,000 Beli]
+    - Button: Bisento [1,000,000 Beli]
+    - Button: Legendary Sword [2,000,000 Beli] — Shizu / Saishi / Oroshi
+    - Button: True Triple Katana [2,000,000 Beli]
+    - Button: Pole V2 [5,000 Fragments]
+
+    [Shop > Fighting Style]
+    - Button: Dark Step
+    - Button: Electric
+    - Button: Water Kungfu
+    - Button: Dragon Breath
+    - Button: Superhuman
+    - Button: Death Step
+    - Button: Sharkman Karate
+    - Button: Electric Claw
+    - Button: Dragon Talon
+    - Button: Godhuman
+    - Button: Sanguine Art
+
+    [Shop > Race & Stats]
+    - Button: Buy Stats Refund
+    - Button: Buy Reroll Race
+    - Button: Change Race Ghoul
+    - Button: Change Race Cybrog
+    - Button: Change Race Draco — Only In Sea 3
+
+    [Misc > Server Hop & Job Id]
+    - Button: Rejoin Server
+    - Button: Hop Server
+    - Input: Job ID — Put Job Id First
+    - Button: Join Job Id — Put Job Id First
+    - Button: Copy Job Id — Copy Job Id Server
+    - Toggle: Spam Join Job Id — Run everything: remove effects, clean RAM, lower rendering, disable shadows
+
+    [Misc > ⚡ Ultra Optimizer v5.0]
+    - Button: 🚀 Ultra Optimize (All-in-One) — Run everything: remove effects, clean RAM, lower rendering, disable shadows
+    - Button: 🧹 Clean RAM Now — Remove junk files, dead enemies, and run garbage collection
+    - Button: ✨ Remove NPC Effects — Disable particles, trails, fire, smoke and lights on enemies
+    - Button: 🌑 Disable Map Shadows — Disable CastShadow across the map for better FPS
+    - Button: 🎮 Render Quality Level 1 — Remove Blur, Bloom, SunRays, Atmosphere, Fog and other post-processing effects
+    - Toggle: 🔄 Auto RAM Cleaner (Every 30 Seconds) — Automatically clean memory and remove dead enemies every 30 seconds
+    - Button: 📺 Stretch Screen (0.65) — Smooth 60fps
+
+    [Misc > Team]
+    - Button: Join Team Pirates
+    - Button: Join Team Marines
+
+    [Misc > Code]
+    - Button: Reedem Code
+
+    [Misc > Title]
+    - Button: Title Ui
+
+    [Misc > Awakend]
+    - Button: Awakend Ui
+
+    [Misc > Rejoin]
+    - Toggle: Auto Rejoin Server
+
+    [Misc > Other]
+    - Button: No Fog
+    - Toggle: Anti Ban
+
+    [Sea Event > Sea Event [ Follow ]]
+    - Dropdown: Select Boat — Select player boat to follow
+    - Button: Refresh Boat List — Refresh player boat + owner list
+    - Toggle: Follow Boat — Automatically move to the selected boat and keep seated
+
+    [Sea Event > Sea Event]
+    - Dropdown: Select Boats
+    - Dropdown: Select Level Sea — Select danger level to travel
+    - Toggle: Auto Start farm — Auto Buy Boat & Move to Zone
+    - Toggle: Activate Boat Speed — Enable custom boat speed
+    - Input: Boat Speed Value [ Defult : 300 ]
+    - Toggle: Auto Attack Sea Beast
+    - Toggle: Auto Attack Pirate GrandBrigade
+
+    [Sea Event > Go to Sea 3 or Sea 2 for Farm maritime events]
+    - Toggle: Auto Shark
+    - Toggle: Auto Piranha
+    - Toggle: Auto Terror Shark
+    - Toggle: Auto Fish Crew Member
+    - Toggle: Auto Haunted Crew Member
+    - Toggle: Auto Attack Fish Boat
+    - Toggle: Active M1 Gun — Farm normal mobs with Gun M1 when weapon mode is Gun
+    - Toggle: Use M1 Gun Sea Event — All selected sea events use Gun M1 only
+    - Toggle: Boat Combat Orbit — Boat flies and rotates around the active sea event
+    - Slider: Boat Orbit Y — Height above event
+    - Slider: Boat Orbit Radius — Rotation circle size
+    - Slider: Boat Rotate Speed — Rotation speed
+    - Toggle: Kill All Sea Events — Instantly kill sea-event enemies except Leviathan
+
+    [Sea Event > Frozen Dimension]
+    - Button: Buy Spy — Buy the spy for finding leviathan
+    - Toggle: Teleport Frozen Dimension — turn on for teleport to frozen dimension and start the leviathan gate
+    - Toggle: Auto Attack Leviathan
+
+    [Sea Event > Kitsune Island]
+    - Toggle: Auto Find Kitsune Island — turn on for finding & tween kitsune island
+    - Toggle: Auto Teleport to Shrine Actived
+    - Toggle: Auto Collect Azure Ember
+    - Toggle: Auto Trade Azure Ember
+    - Button: Trade Items Azure
+    - Button: Talk with kitsune statue
+
+    [Sea Event > Mirrage Island]
+    - Toggle: Auto Find Mirage Island — Turn on for finding & tweening to Mirage Island
+    - Toggle: Auto Tween To Highest Point
+    - Toggle: Auto Collect Gear
+    - Toggle: Change Transparency — Make Mirage obstacles transparent
+    - Toggle: Auto Tween Advanced Fruit Dealer
+    - Toggle: Auto Collect Mirage Chest
+
+    [Sea Event > Prehistoric Island]
+    - Toggle: Auto Find Prehistoric Island — Automatically find and sail to Prehistoric Island
+    - Toggle: Auto Event Prehistoric Island — Automatically handle Prehistoric Island event
+    - Button: Remove Lava
+    - Toggle: Auto Collect Dino Bones
+    - Toggle: Auto Collect Dragon Eggs
+    - Toggle: Auto Reset When Complete Volcano
+    - Toggle: Auto Kill Aura Lava Golem
+    - Toggle: Auto Craft Volcanic Magnet
+    - Button: Craft Volcanic Magnet
+
+    [Draco & Dragon Dojo > Dragon Dojo]
+    - Toggle: Auto Dojo Trainer — Full auto White -> Black Belt except Orange / Blue
+    - Toggle: Auto Dragon Hunter — turn on for farm blaze ember + auto collect blaze ember
+
+    [Draco & Dragon Dojo > Draco Trial]
+    - Toggle: Tween To Upgrade Draco Trial
+    - Toggle: Auto race draco (V1) — turn on for auto quest1 auto prehistoric event + collect dragon eggs
+    - Toggle: Auto race draco (V2) — turn on for auto kill Forest Pirate & Collect fireflower
+    - Toggle: Auto race draco (V3) — turn on for sea event kill terror shark
+    - Toggle: Auto Relic Draco Trial [Beta] — turn on for auto trial v4 you have to COLLECT RELIC by your self
+    - Toggle: Auto to train race draco — turn on for training Drago race v4 + auto upgrade tier
+    - Toggle: Fly Mode
+    - Toggle: Tween to Draco Trials
+    - Toggle: Swap Draco Race
+    - Toggle: Upgrade Dragon Talon With Uzoth
+
+    [Draco & Dragon Dojo > Multi Farm Priority]
+    - Toggle: Enable Multi Farm — Automatic priority scheduler
+    - Dropdown: Priority  — Disabled
+    ]]
+
+    local SYSTEM_PROMPT = [[
+    Kamu adalah "Ganteng Asisten", asisten resmi untuk membantu user memahami dan menggunakan Ganteng Hub Premium.
+
+    TUGAS UTAMA:
+    Kamu HANYA boleh:
+    1. memperkenalkan feature Ganteng Hub;
+    2. menjelaskan fungsi feature;
+    3. menjelaskan lokasi feature (Tab > Section > nama control);
+    4. menjelaskan cara memakai feature langkah demi langkah;
+    5. menjelaskan pilihan dropdown, slider, toggle, dan button yang terkait;
+    6. menjelaskan prerequisite, batasan, dan catatan penggunaan yang memang didukung oleh data feature guide di bawah.
+
+    Kamu TIDAK boleh:
+    - menjalankan kode;
+    - membuat kode Luau;
+    - melakukan runtime inspection;
+    - melakukan web search;
+    - membahas atau membantu Dev Panel;
+    - mengarang feature yang tidak ada di feature guide;
+    - mengarang prerequisite atau fungsi yang tidak didukung oleh source.
+
+    ATURAN JAWABAN:
+    - Gunakan Bahasa Indonesia.
+    - Jawaban langsung ke inti, tetapi cukup detail.
+    - Saat user menanyakan satu feature, gunakan format:
+      Nama feature
+      Lokasi: Tab > Section > Control
+      Fungsi: ...
+      Cara pakai:
+      1. ...
+      2. ...
+      3. ...
+      Setting/opsi: ...
+      Catatan: ...
+    - Kalau user hanya bertanya "apa itu X", jelaskan fungsi + cara singkat memakai.
+    - Kalau user bertanya perbedaan dua feature, jelaskan perbedaan fungsi/cara pakai tanpa memberi ranking.
+    - Kalau user bertanya feature yang memiliki dropdown, jelaskan dropdown harus dipilih sebelum toggle bila source menyatakan demikian.
+    - Gunakan nama control persis seperti yang tampil di hub. Jangan mengubah nama menjadi feature baru.
+    - Untuk fitur yang source guide hanya memberi nama tanpa detail prerequisite, katakan bahwa prerequisite detail tidak tercantum di source, jangan mengarang.
+    - Untuk tombol, jelaskan bahwa user cukup klik tombol tersebut dan jelaskan fungsi tombolnya sesuai guide.
+    - Untuk toggle, jelaskan kapan diaktifkan dan apa yang dikerjakan setelah ON.
+    - Untuk slider, jelaskan apa yang dikontrol dan default yang tersedia bila tercantum.
+    - Untuk fitur Sea Event, Race V4, Draco, Dojo, dan Multi Farm, perhatikan catatan khusus di bawah.
+
+    DEV PANEL:
+    Jika user menanyakan "Dev Panel", "Online Status" di Dev Panel, atau feature khusus Dev Panel, jawab singkat:
+    "Ganteng Asisten hanya membahas feature user-facing Ganteng Hub dan tidak mencakup Dev Panel."
+    Jangan menjelaskan isi Dev Panel.
+
+    CATATAN KHUSUS FEATURE:
+    - Farm Mastery: user memilih Select Metode, lalu memilih salah satu Auto Mastery Fruit atau Auto Mastery Guns dan mengatur Healt Min Kill. Untuk alur mastery yang digunakan saat ini: target di-hit dulu dengan AttackEnemies; setelah HP target sudah mencapai threshold Healt Min Kill, barulah berpindah ke mastery. Gun menggunakan M1; Fruit menggunakan skill yang diarahkan ke target.
+    - Farm Level: gunakan Select Weapon terlebih dahulu lalu aktifkan Farm Level. Kill Mob Aura adalah pilihan terpisah.
+    - Auto Farm Mob: source menandai [SELECT FIRST], jadi Select Mob harus dipilih sebelum mengaktifkan Auto Farm Mob.
+    - Secret Quest [Beta]: pilih Select Island lalu Start Auto Secret untuk membersihkan secret hingga 3/3 star.
+    - Raid: Select Chip dipilih untuk fitur yang memakai chip; Auto Buy Chip sesuai deskripsi meminta chip dipilih terlebih dahulu. Auto Start Raid memulai raid, Auto Next Island melanjutkan island, Raid Attack Enemies menyerang musuh raid, Auto Awake Fruit membangunkan fruit setelah raid, dan Auto Load Fruit Common memuat fruit common untuk raid sesuai feature.
+    - Auto Farm Fragment: bisa memakai fruit yang dipilih dari dropdown atau Physical Fruit dari Backpack; Use Fruit from Backpack ON berarti memakai fruit di Backpack tanpa LoadFruit. Pilih Select Raid sebelum Auto Farm Fragment.
+    - Sea Event: Select Boats/Select Level Sea digunakan untuk menentukan boat dan danger level; Auto Start farm mengurus pembelian boat dan perpindahan ke zona. Feature serangan laut diaktifkan sesuai event yang dibutuhkan.
+    - Active M1 Gun di Sea Event berkaitan dengan farm normal mob menggunakan Gun M1 saat weapon mode Gun. Use M1 Gun Sea Event memaksa selected sea events memakai Gun M1. Boat Combat Orbit memakai slider Boat Orbit Y/Radius/Rotate Speed.
+    - Dojo: Auto Dojo Trainer melakukan White -> Black Belt secara otomatis, dengan Orange dan Blue dikecualikan dari auto system.
+    - Draco: V1, V2, V3 adalah tahap race yang dijelaskan oleh deskripsi masing-masing. Auto Relic Draco Trial [Beta] memerlukan user mengumpulkan relic sendiri. Auto to train race draco menangani training + upgrade tier.
+    - Multi Farm Priority: Enable Multi Farm mengaktifkan automatic priority scheduler. Urutan priority dibaca dari atas ke bawah; mode pertama yang memiliki pekerjaan mengambil kontrol. None dapat dipakai untuk slot yang tidak digunakan.
+    - Setting Skill: Skill Z/X/C/V/F adalah pemilih skill yang dipakai oleh sistem mastery/skill yang relevan.
+    - Safe Item Protection: mencegah bypass teleport saat membawa item berharga.
+
+    SUMBER FEATURE GUIDE:
+    Feature guide berikut dibuat dari struktur UI Ganteng Hub yang diberikan. Gunakan ini sebagai sumber utama.
+
+    ]]
+    ]]
+
+    local function AddHistory(role, content)
+        ChatHistory[#ChatHistory + 1] = {
+            role = role,
+            content = tostring(content or "")
+        }
+
+        while #ChatHistory > 12 do
+            table.remove(ChatHistory, 1)
+        end
+    end
+
+    local function AskAI(question)
+        if not req then
+            CreateBubble("❌ Executor tidak mendukung HTTP Request.", false)
+            isProcessing = false
+            return
+        end
+
+        local messages = {
+            {
+                role = "system",
+                content = SYSTEM_PROMPT .. FEATURE_CATALOG
+            }
+        }
+
+        for _, message in ipairs(ChatHistory) do
+            messages[#messages + 1] = message
+        end
+
+        messages[#messages + 1] = {
+            role = "user",
+            content = question
+        }
+
+        local payload = {
+            model = "openai/gpt-oss-120b",
+            messages = messages,
+            temperature = 0.2,
+            max_tokens = 1200
+        }
+
+        local body = HttpService:JSONEncode(payload)
+
+        local success, result = pcall(function()
+            return req({
+                Url = "https://api.groq.com/openai/v1/chat/completions",
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json",
+                    ["Authorization"] = "Bearer " .. API_KEY,
+                    ["User-Agent"] = "Roblox/GantengAsisten"
+                },
+                Body = body
+            })
+        end)
+
+        if not success then
+            CreateBubble("❌ Request error:\n" .. tostring(result), false)
+            isProcessing = false
+            return
+        end
+
+        if not result then
+            CreateBubble("❌ Tidak ada response dari Ganteng Asisten.", false)
+            isProcessing = false
+            return
+        end
+
+        if tonumber(result.StatusCode) ~= 200 then
+            local errorBody = tostring(result.Body or ""):sub(1, 2500)
+            CreateBubble(
+                "❌ AI HTTP Error: " .. tostring(result.StatusCode) ..
+                "\n\n" .. errorBody,
+                false
+            )
+            isProcessing = false
+            return
+        end
+
+        local decodeSuccess, data = pcall(function()
+            return HttpService:JSONDecode(result.Body)
+        end)
+
+        if not decodeSuccess
+            or not data
+            or not data.choices
+            or not data.choices[1]
+            or not data.choices[1].message then
+            CreateBubble("❌ Gagal membaca response Ganteng Asisten.", false)
+            isProcessing = false
+            return
+        end
+
+        local response = tostring(data.choices[1].message.content or "")
+
+        AddHistory("user", question)
+        AddHistory("assistant", response)
+
+        if response ~= "" then
+            CreateBubble(response, false)
+        else
+            CreateBubble("❌ Response kosong.", false)
+        end
+
+        isProcessing = false
+    end
+
+    -- ============================================================
+    -- SEND MESSAGE + 6s COOLDOWN
+    -- ============================================================
+
+    local function SendMessage()
+        local text = ChatInput.Text
+
+        if text == ""
+            or string.match(text, "^%s*$")
+            or isProcessing then
+            return
+        end
+
+        local now = os.clock()
+        local remaining = COOLDOWN - (now - LastAskAt)
+
+        if remaining > 0 then
+            CreateBubble(
+                "⏳ Tunggu " .. string.format("%.1f", remaining) .. " detik sebelum bertanya lagi.",
+                false
+            )
+            return
+        end
+
+        LastAskAt = now
+
+        TweenService:Create(
+            SendScale,
+            TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+            {Scale = 0.8}
+        ):Play()
+
+        task.wait(0.1)
+
+        TweenService:Create(
+            SendScale,
+            TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+            {Scale = 1}
+        ):Play()
+
+        isProcessing = true
+
+        CreateBubble(text, true)
+        ChatInput.Text = ""
+
+        task.spawn(function()
+            AskAI(text)
+        end)
+    end
+
+    SendBtn.MouseButton1Click:Connect(SendMessage)
+
+    ChatInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            SendMessage()
+        end
+    end)
+
+    CreateBubble(
+        "👋 Halo! Saya Ganteng Asisten.\nTanya saya tentang feature Ganteng Hub dan cara pakainya.\nContoh: \"Cara pakai Auto Farm Level?\"",
+        false
+    )
+
+end
